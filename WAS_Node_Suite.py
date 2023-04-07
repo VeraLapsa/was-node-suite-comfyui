@@ -95,13 +95,13 @@ def medianFilter(img, diameter, sigmaColor, sigmaSpace):
     img = cv.bilateralFilter(img, diameter, sigmaColor, sigmaSpace)
     img = cv.cvtColor(np.array(img), cv.COLOR_BGR2RGB)
     return Image.fromarray(img).convert('RGB')
-    
+
 # WAS SETTINGS MANAGER
 
 class WASDatabase:
     """
-    The WAS Suite Database Class provides a simple key-value database that stores 
-    data in a flatfile using the JSON format. Each key-value pair is associated with 
+    The WAS Suite Database Class provides a simple key-value database that stores
+    data in a flatfile using the JSON format. Each key-value pair is associated with
     a category.
 
     Attributes:
@@ -137,7 +137,7 @@ class WASDatabase:
         if category in self.data and key in self.data[category]:
             self.data[category][key] = value
             self._save()
-        
+
     def get(self, category, key):
         return self.data.get(category, {}).get(key, None)
 
@@ -207,24 +207,24 @@ class WAS_Filter_Class():
         image = pilgram.css.blending.lighten(image, particles2)
 
         return image
-            
+
     def retro_digital_filter(self, image, amplitude=5, line_width=2):
-        
+
         # Convert the PIL image to a numpy array
         im = np.array(image)
-            
+
         # Create a sine wave with the given amplitude
         x, y, z = im.shape
         sine_wave = amplitude * np.sin(np.linspace(-np.pi, np.pi, y))
         sine_wave = sine_wave.astype(int)
-            
+
         # Create the left and right distortion matrices
         left_distortion = np.zeros((x, y, z), dtype=np.uint8)
         right_distortion = np.zeros((x, y, z), dtype=np.uint8)
         for i in range(y):
             left_distortion[:, i, :] = np.roll(im[:, i, :], -sine_wave[i], axis=0)
             right_distortion[:, i, :] = np.roll(im[:, i, :], sine_wave[i], axis=0)
-            
+
         # Combine the distorted images and add scan lines as a mask
         distorted_image = np.maximum(left_distortion, right_distortion)
         scan_lines = np.zeros((x, y), dtype=np.float32)
@@ -233,37 +233,37 @@ class WAS_Filter_Class():
         scan_lines = np.tile(scan_lines[:, :, np.newaxis], (1, 1, z))  # Add channel dimension
         distorted_image = np.where(scan_lines > 0, np.random.permutation(im), distorted_image)
         distorted_image = np.roll(distorted_image, np.random.randint(0, y), axis=1)
-            
+
         # Convert the numpy array back to a PIL image
         distorted_image = Image.fromarray(distorted_image)
-            
+
         return distorted_image
 
     def signal_distortion_filter(self, image, offset_variance):
-        
+
         # Convert the image to a numpy array for easy manipulation
         img_array = np.array(image)
-            
+
         # Generate random shift values for each row of the image
         row_shifts = np.random.randint(-offset_variance, offset_variance + 1, size=img_array.shape[0])
-            
+
         # Create an empty array to hold the distorted image
         distorted_array = np.zeros_like(img_array)
-            
+
         # Loop through each row of the image
         for y in range(img_array.shape[0]):
             # Determine the X-axis shift value for this row
             x_shift = row_shifts[y]
-                
+
             # Use modular function to determine where to shift
             x_shift = x_shift + y % (offset_variance * 2) - offset_variance
-                
+
             # Shift the pixels in this row by the X-axis shift value
             distorted_array[y,:] = np.roll(img_array[y,:], x_shift, axis=0)
-            
+
         # Convert the distorted array back to a PIL image
         distorted_image = Image.fromarray(distorted_array)
-            
+
         return distorted_image
 
     def apply_vhs_x_distortion(self, image, offset_multiplier=10):
@@ -310,7 +310,7 @@ class WAS_Filter_Class():
         effect_image = ImageChops.overlay(image, distorted_image)
         result_image = ImageChops.overlay(image, effect_image)
         result_image = ImageChops.blend(image, result_image, 0.25)
-            
+
         return result_image
 
 # INSTALLATION CLEANUP
@@ -790,14 +790,14 @@ class WAS_Image_Rescale:
             'bicubic': 3,
             'lanczos': 1
         }
-        
+
         # Apply supersample
         if supersample == 'true':
             image = image.resize((new_width * 8, new_height * 8), resample=Image.Resampling(resample_filters[resample]))
 
         # Resize the image using the given resampling filter
         resized_image = image.resize((new_width, new_height), resample=Image.Resampling(resample_filters[resample]))
-        
+
         return resized_image
 
 
@@ -806,7 +806,7 @@ class WAS_Image_Rescale:
 class WAS_Load_Image_Batch:
     def __init__(self):
         pass
-            
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -2203,7 +2203,7 @@ class WAS_Image_Save:
             if extra_pnginfo is not None:
                 for x in extra_pnginfo:
                     metadata.add_text(x, json.dumps(extra_pnginfo[x]))
-                
+
 
             if overwrite_mode == 'prefix_as_filename':
                 file = f"{filename_prefix}.{extension}"
@@ -2229,7 +2229,7 @@ class WAS_Image_Save:
             paths.append(file)
             if overwrite_mode == 'false':
                 counter += 1
-                
+
         return {"ui": {"images": paths}}
 
 
@@ -2982,7 +2982,7 @@ class WAS_Text_Parse_NSP:
     def text_parse_nsp(self, text, noodle_key='__', seed=0):
 
         # Fetch the NSP Pantry
-        local_pantry = os.getcwd()+os.sep+'ComfyUI'+os.sep+'custom_nodes'+os.sep+'nsp_pantry.json'
+        local_pantry = os.getcwd()+os.sep+'custom_nodes'+os.sep+'nsp_pantry.json'
         if not os.path.exists(local_pantry):
             response = urlopen('https://raw.githubusercontent.com/WASasquatch/noodle-soup-prompts/main/nsp_pantry.json')
             tmp_pantry = json.loads(response.read())
@@ -3494,7 +3494,7 @@ class WAS_Debug_Number_to_Console:
         else:
             print(f'\033[34mWAS Node Suite \033[33mDebug to Console\033[0m:\n{number}\n')
         return (number, )
-        
+
     @classmethod
     def IS_CHANGED(cls, **kwargs):
         return float("NaN")
